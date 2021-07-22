@@ -1,11 +1,13 @@
 import React from 'react';
-import { Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, View } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { RFValue } from 'react-native-responsive-fontsize';
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import uuid from 'react-native-uuid';
+import { useNavigation } from '@react-navigation/native';
+
 
 import { Input } from '../../components/Form/Input';
 import { Button } from '../../components/Form/Button';
@@ -29,6 +31,8 @@ const schema = Yup.object().shape({
 })
 
 export function RegisterLoginData() {
+  // const navigation = useNavigation();
+
   const {
     control,
     handleSubmit,
@@ -36,16 +40,42 @@ export function RegisterLoginData() {
     formState: {
       errors
     }
-  } = useForm();
-
+  } = useForm({
+    resolver: yupResolver(schema)
+  });
   async function handleRegister(formData: FormData) {
+    // Primeiro pega tudo q ja tem salvo no asyncStorage
+    // pra dps acoplar a ultima senha posta ,e salvar ela junto das demais
+    // console.log(formData);
     const newLoginData = {
       id: String(uuid.v4()),
       ...formData
     }
+    try {
+      const dataKey = '@passmanager:logins';
+      const data = await AsyncStorage.getItem(dataKey);
+      if (data) {
+        const currentData = JSON.parse(data);
 
-    // Save data on AsyncStorage
+        const dataUpdated = [
+          ...currentData,
+          newLoginData
+        ];
+
+        await AsyncStorage.setItem(dataKey, JSON.stringify(dataUpdated));
+
+      }
+
+
+      // console.log(dataUpdated)
+      reset();
+      // navigation.navigate('Home');
+    } catch (error) {
+      console.log(error);
+      Alert.alert('Não foi possivel salvar a senha');
+    }
   }
+
 
   return (
     <KeyboardAvoidingView
@@ -61,7 +91,7 @@ export function RegisterLoginData() {
             title="Título"
             name="title"
             error={
-              // message error here
+              errors.title && errors.title.message
             }
             control={control}
             placeholder="Escreva o título aqui"
@@ -72,7 +102,7 @@ export function RegisterLoginData() {
             title="Email"
             name="email"
             error={
-              // message error here
+              errors.email && errors.email.message
             }
             control={control}
             placeholder="Escreva o Email aqui"
@@ -84,7 +114,7 @@ export function RegisterLoginData() {
             title="Senha"
             name="password"
             error={
-              // message error here
+              errors.password && errors.password.message
             }
             control={control}
             secureTextEntry

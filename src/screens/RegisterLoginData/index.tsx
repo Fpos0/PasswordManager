@@ -17,6 +17,7 @@ import {
   HeaderTitle,
   Form
 } from './styles';
+import { useStorage } from '../../hooks/storage';
 
 interface FormData {
   title: string;
@@ -31,8 +32,8 @@ const schema = Yup.object().shape({
 })
 
 export function RegisterLoginData() {
-  // const navigation = useNavigation();
-
+  const navigation = useNavigation();
+  const { setLoginData } = useStorage();
   const {
     control,
     handleSubmit,
@@ -44,36 +45,13 @@ export function RegisterLoginData() {
     resolver: yupResolver(schema)
   });
   async function handleRegister(formData: FormData) {
-    // Primeiro pega tudo q ja tem salvo no asyncStorage
-    // pra dps acoplar a ultima senha posta ,e salvar ela junto das demais
-    // console.log(formData);
-    const newLoginData = {
-      id: String(uuid.v4()),
-      ...formData
-    }
-    try {
-      const dataKey = '@passmanager:logins';
-      const data = await AsyncStorage.getItem(dataKey);
-      if (data) {
-        const currentData = JSON.parse(data);
 
-        const dataUpdated = [
-          ...currentData,
-          newLoginData
-        ];
-
-        await AsyncStorage.setItem(dataKey, JSON.stringify(dataUpdated));
-
-      }
+    setLoginData(formData);
 
 
-      // console.log(dataUpdated)
-      reset();
-      // navigation.navigate('Home');
-    } catch (error) {
-      console.log(error);
-      Alert.alert('Não foi possivel salvar a senha');
-    }
+    reset();
+    navigation.navigate('Home');
+
   }
 
 

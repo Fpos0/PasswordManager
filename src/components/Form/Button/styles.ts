@@ -3,7 +3,7 @@ import { TouchableOpacity } from 'react-native';
 import { RFValue } from 'react-native-responsive-fontsize';
 
 export const Container = styled(TouchableOpacity)`
-  background-color: #FECBB2;
+  background-color: ${({ theme }) => theme.colors.btn};
 
   padding: 15px 0;
 
@@ -16,5 +16,5 @@ export const ButtonText = styled.Text`
   font-family: 'Poppins_500Medium';
   font-size: ${RFValue(14)}px;
 
-  color: #4E3975;
+  color: ${({ theme }) => theme.colors.primary};
 `;

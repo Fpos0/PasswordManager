@@ -11,6 +11,7 @@ import {
   EmptyListContainer,
   EmptyListMessage
 } from './styles';
+import { useStorage } from '../../hooks/storage';
 
 interface LoginDataProps {
   id: string;
@@ -24,24 +25,12 @@ type LoginListDataProps = LoginDataProps[];
 const dataKey = '@passmanager:logins';
 
 export function Home() {
-  const [searchListData, setSearchListData] = useState<LoginListDataProps>([]);
-  const [data, setData] = useState<LoginListDataProps>([]);
 
+  const { getLoginData, searchListData, handleFilterLoginData } = useStorage();
   async function loadData() {
-    // Get asyncStorage data, use setSearchListData and setData
-    try {
-      const response = await AsyncStorage.getItem(dataKey);
-      if (!response) return;
-      const logins = JSON.parse(response);
-      console.log(logins);
-
-      setSearchListData(logins);
-      setData(logins);
-    } catch (error) {
-      console.log(error)
-    }
-
+    getLoginData();
   }
+
   useEffect(() => {
     loadData();
   }, []);
@@ -51,18 +40,7 @@ export function Home() {
 
   }, []));
 
-  function handleFilterLoginData(search: string) {
-    if (search === '') {
-      return;
-    }
-    // Filter results inside data, save with setSearchListData
-    const filteredLogins = data.filter((loginInfo: LoginDataProps) => {
-      return loginInfo.title.toLowerCase().includes(search.toLowerCase())
-    })
-    console.log(filteredLogins);
-    setSearchListData(filteredLogins);
 
-  }
 
   return (
     <Container>
